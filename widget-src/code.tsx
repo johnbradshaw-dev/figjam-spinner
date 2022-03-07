@@ -1,11 +1,64 @@
 const { widget } = figma;
-const { AutoLayout, waitForTask, Text, useSyncedState, useEffect, useSyncedMap } = widget;
+const { AutoLayout, waitForTask, Text, useSyncedState, useEffect, useSyncedMap, Image, Rectangle } = widget;
 
 type SpinnerUser = {
   color: string,
   id: string | null,
   name: string | null,
   selected: boolean
+  photoUrl: string | null
+}
+
+function UserBadge(props: { user: SpinnerUser, selected: boolean, showRemove: boolean, removeClick: () => void }) {
+  return (
+    <AutoLayout
+      direction="horizontal"
+      horizontalAlignItems="center"
+      width="fill-parent"
+      padding={4}
+      fill={props.selected ? "#ff00b1" : "#FFFFFF"}
+      cornerRadius={8}
+      spacing={6}
+      effect={{
+        type: 'drop-shadow',
+        color: { r: 0, g: 0, b: 0, a: 0.2 },
+        offset: { x: 0, y: 0 },
+        blur: 2,
+        spread: 2,
+      }}
+    >
+      <AutoLayout
+        direction="horizontal"
+        horizontalAlignItems="start"
+        width="fill-parent"
+        padding={5}
+        fill="#E6E6E6"
+        cornerRadius={8}
+      >
+        {props.user.photoUrl ? (
+          <Image cornerRadius={6} width={30} height={30} src={props.user.photoUrl} />
+        ) : (
+          <Rectangle cornerRadius={6} width={30} height={30} fill={props.user.color} />
+        )}
+        <AutoLayout
+          direction="horizontal"
+          horizontalAlignItems="center"
+          width="fill-parent"
+          padding={4}
+        >
+          <Text fontSize={16}>{props.user.name}</Text>
+        </AutoLayout>
+        <AutoLayout
+          direction="horizontal"
+          horizontalAlignItems="end"
+          padding={4}
+          onClick={props.showRemove ? props.removeClick : undefined}
+        >
+          <Text fill={props.showRemove ? "#000" : "#ccc"} fontSize={16}>X</Text>
+        </AutoLayout>
+      </AutoLayout>
+    </AutoLayout>
+  )
 }
 
 function Widget() {
@@ -24,7 +77,8 @@ function Widget() {
   }
   useEffect(() => {
     figma.ui.onmessage = ({ contents }) => {
-      names.set(contents, { name: contents, color: "#000", id: (Math.random() * Math.random()).toString(), selected: false })
+      var randomColor = Math.floor(Math.random() * 16777215).toString(16);
+      names.set(contents, { name: contents, color: `#${randomColor}`, id: (Math.random() * Math.random()).toString(), selected: false, photoUrl: null })
     }
     if (figma.activeUsers.length == 0)
       return;
@@ -33,7 +87,6 @@ function Widget() {
     }
   })
 
-  //const [names, setNames] = useSyncedState<SpinnerUser[]>("names", []);
   const [spinning, setSpinning] = useSyncedState<boolean>("spinning", false);
   const [winner, setWinner] = useSyncedState<SpinnerUser | null>("winner", null);
 
@@ -62,7 +115,6 @@ function Widget() {
 
   const spin = () => {
     if (spinning === true) {
-      console.log('spinning')
       return;
     }
     setSpinning(true);
@@ -75,15 +127,12 @@ function Widget() {
         names.set(n.name || "", n)
       });
       setWinner(newNames[randomIndex])
-    }, 5);
+    }, 10 - (Math.floor(Math.random() * 5)));
 
     waitForTask(new Promise(resolve => {
-      // Simulate async work
       setTimeout(() => {
-        console.log("stopped spinning")
         setSpinning(false);
         clearInterval(interval);
-        // Resolve the task
         resolve(true);
       }, 2000)
     }));
@@ -95,27 +144,45 @@ function Widget() {
       horizontalAlignItems="center"
       verticalAlignItems="center"
       height="hug-contents"
+      width={300}
       padding={8}
       fill="#FFFFFF"
       cornerRadius={8}
       spacing={12}
+      stroke={{ r: 0, g: 0, b: 0, a: 0.2 }}
+      effect={{
+        type: 'drop-shadow',
+        color: { r: 0, g: 0, b: 0, a: 0.2 },
+        offset: { x: 5, y: 5 },
+        blur: 2,
+        spread: 2,
+      }}
     >
+      <Text width="fill-parent" horizontalAlignText="center" onClick={() => spin()}>
+        Spinner
+      </Text>
       {names.values().map(a => <AutoLayout
         direction="horizontal"
+        width="fill-parent"
         spacing={8}
         padding={5}
         verticalAlignItems="center"
-        fill = {a.selected ? "#ff00b1" : "#FFF"}
         key={a.name || "null"}
       >
-        <Text fontSize={32} horizontalAlignText="center" fill={a.color}>
-          {a.name}
-        </Text>{!spinning ? <Text fontSize={15} horizontalAlignText="center" fill="#ff0000" onClick={() => { names.delete(a.name || "") }}>
-          x
-        </Text> : undefined}</AutoLayout>)}
-      {winner && !spinning ? <Text fontSize={50} fill={winner?.color || "#000"} horizontalAlignText="center">
-        It's {winner ? winner.name : ""}'s turn!
-      </Text> : undefined}
+        <UserBadge user={a} selected={a.selected} showRemove={!spinning} removeClick={() => { a.name ? names.delete(a.name) : undefined }} />
+      </AutoLayout>)}
+      <AutoLayout
+        direction="horizontal"
+        horizontalAlignItems="center"
+        width="fill-parent"
+        height="hug-contents"
+        padding={4}
+      >
+        {winner && !spinning ? <Text width="fill-parent" fill={winner?.color || "#000"} horizontalAlignText="center">
+          It's {winner ? winner.name : ""}'s turn!
+        </Text> : <Text width="fill-parent" fill={winner?.color || "#000"} horizontalAlignText="center">
+        </Text>}
+      </AutoLayout>
       <Text fontSize={32} horizontalAlignText="center" onClick={() => spin()}>
         Spin!
       </Text>
