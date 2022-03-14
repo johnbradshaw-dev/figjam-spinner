@@ -41,4 +41,5 @@ This runs bundling with minification turned on. You should run this command befo
 ### `npm run test`
 
 This runs typechecking and makes sure that your widget builds without errors.
+
 # figjam-spinner
