@@ -8,6 +8,7 @@ const {
   useSyncedMap,
   Image,
   Rectangle,
+  Ellipse,
 } = widget;
 
 type SpinnerUser = {
@@ -22,6 +23,7 @@ function UserBadge(props: {
   user: SpinnerUser;
   selected: boolean;
   showRemove: boolean;
+  scale: number;
   removeClick: () => void;
 }) {
   return (
@@ -29,16 +31,16 @@ function UserBadge(props: {
       direction="horizontal"
       horizontalAlignItems="center"
       width="fill-parent"
-      padding={4}
+      padding={4 * props.scale}
       fill={props.selected ? "#ff00b1" : "#FFFFFF"}
-      cornerRadius={8}
-      spacing={6}
+      cornerRadius={8 * props.scale}
+      spacing={6 * props.scale}
       effect={{
         type: "drop-shadow",
         color: { r: 0, g: 0, b: 0, a: 0.2 },
         offset: { x: 0, y: 0 },
-        blur: 2,
-        spread: 2,
+        blur: 2 * props.scale,
+        spread: 2 * props.scale,
       }}
     >
       <AutoLayout
@@ -51,16 +53,16 @@ function UserBadge(props: {
       >
         {props.user.photoUrl ? (
           <Image
-            cornerRadius={6}
-            width={30}
-            height={30}
+            cornerRadius={6 * props.scale}
+            width={30 * props.scale}
+            height={30 * props.scale}
             src={props.user.photoUrl}
           />
         ) : (
           <Rectangle
-            cornerRadius={6}
-            width={30}
-            height={30}
+            cornerRadius={6 * props.scale}
+            width={30 * props.scale}
+            height={30 * props.scale}
             fill={props.user.color}
           />
         )}
@@ -68,17 +70,20 @@ function UserBadge(props: {
           direction="horizontal"
           horizontalAlignItems="center"
           width="fill-parent"
-          padding={4}
+          padding={4 * props.scale}
         >
-          <Text fontSize={16}>{props.user.name}</Text>
+          <Text fontSize={16 * props.scale}>{props.user.name}</Text>
         </AutoLayout>
         <AutoLayout
           direction="horizontal"
           horizontalAlignItems="end"
-          padding={4}
+          padding={4 * props.scale}
           onClick={props.showRemove ? props.removeClick : undefined}
         >
-          <Text fill={props.showRemove ? "#000" : "#ccc"} fontSize={16}>
+          <Text
+            fill={props.showRemove ? "#000" : "#ccc"}
+            fontSize={16 * props.scale}
+          >
             X
           </Text>
         </AutoLayout>
@@ -127,6 +132,7 @@ function Widget() {
     "winner",
     null
   );
+  const [scale, setScale] = useSyncedState<number>("scale", 1.0);
 
   const reset = () => {
     initialise();
@@ -184,24 +190,25 @@ function Widget() {
       horizontalAlignItems="center"
       verticalAlignItems="center"
       height="hug-contents"
-      width={300}
-      padding={8}
+      width={300 * scale}
+      padding={8 * scale}
       fill="#FFFFFF"
-      cornerRadius={8}
-      spacing={12}
+      cornerRadius={8 * scale}
+      spacing={12 * scale}
       stroke={{ r: 0, g: 0, b: 0, a: 0.2 }}
       effect={{
         type: "drop-shadow",
         color: { r: 0, g: 0, b: 0, a: 0.2 },
-        offset: { x: 5, y: 5 },
-        blur: 2,
-        spread: 2,
+        offset: { x: 5 * scale, y: 5 * scale },
+        blur: 2 * scale,
+        spread: 2 * scale,
       }}
     >
       <Text
         width="fill-parent"
         horizontalAlignText="center"
         onClick={() => spin()}
+        fontSize={24 * scale}
       >
         Spinner
       </Text>
@@ -209,12 +216,13 @@ function Widget() {
         <AutoLayout
           direction="horizontal"
           width="fill-parent"
-          spacing={8}
-          padding={5}
+          spacing={8 * scale}
+          padding={5 * scale}
           verticalAlignItems="center"
           key={a.name || "null"}
         >
           <UserBadge
+            scale={scale}
             user={a}
             selected={a.selected}
             showRemove={!spinning}
@@ -229,13 +237,14 @@ function Widget() {
         horizontalAlignItems="center"
         width="fill-parent"
         height="hug-contents"
-        padding={4}
+        padding={4 * scale}
       >
         {winner && !spinning ? (
           <Text
             width="fill-parent"
             fill={winner?.color || "#000"}
             horizontalAlignText="center"
+            fontSize={40 * scale}
           >
             It's {winner ? winner.name : ""}'s turn!
           </Text>
@@ -247,11 +256,15 @@ function Widget() {
           ></Text>
         )}
       </AutoLayout>
-      <Text fontSize={32} horizontalAlignText="center" onClick={() => spin()}>
+      <Text
+        fontSize={32 * scale}
+        horizontalAlignText="center"
+        onClick={() => spin()}
+      >
         Spin!
       </Text>
       <Text
-        fontSize={24}
+        fontSize={24 * scale}
         horizontalAlignText="center"
         onClick={() => {
           reset();
@@ -260,7 +273,7 @@ function Widget() {
         Reset
       </Text>
       <Text
-        fontSize={12}
+        fontSize={16 * scale}
         horizontalAlignText="center"
         onClick={() => {
           addSomeone();
@@ -269,6 +282,69 @@ function Widget() {
       >
         Add someone who's not here
       </Text>
+
+      <AutoLayout
+        direction="horizontal"
+        horizontalAlignItems="center"
+        width="fill-parent"
+        padding={5 * scale}
+        cornerRadius={8 * scale}
+      >
+        <Text
+          height={"fill-parent"}
+          verticalAlignText="center"
+          fontSize={12 * scale}
+          horizontalAlignText="center"
+          width={42 * scale}
+          onClick={() => {
+            addSomeone();
+            return new Promise<void>(() => {});
+          }}
+        >
+          Scale:
+        </Text>
+        <AutoLayout
+          onClick={() =>
+            scale > 0
+              ? setScale(parseFloat((scale - 0.1).toFixed(1)))
+              : undefined
+          }
+          fill="#E6E6E6"
+          padding={14 * scale}
+          height={28 * scale}
+          width={28 * scale}
+          cornerRadius={16 * scale}
+          verticalAlignItems="center"
+          horizontalAlignItems="center"
+        >
+          <Text fontSize={12 * scale} horizontalAlignText="center">
+            -
+          </Text>
+        </AutoLayout>
+        <Text
+          horizontalAlignText="center"
+          height={"fill-parent"}
+          verticalAlignText="center"
+          fontSize={12 * scale}
+          width={24 * scale}
+        >
+          {scale}
+        </Text>
+        <AutoLayout
+          onClick={() => setScale(parseFloat((scale + 0.1).toFixed(1)))}
+          fill="#E6E6E6"
+          padding={14 * scale}
+          height={28 * scale}
+          width={28 * scale}
+          cornerRadius={16 * scale}
+          verticalAlignItems="center"
+          horizontalAlignItems="center"
+        >
+          <Text fontSize={12 * scale} horizontalAlignText="center">
+            +
+          </Text>
+        </AutoLayout>
+      </AutoLayout>
     </AutoLayout>
   );
 }
