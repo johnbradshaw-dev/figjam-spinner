@@ -701,7 +701,7 @@ function Widget() {
           fontSize={24 * scale}
           fill={isDarkMode ? "#FFFFFF" : "#000"}
         >
-          Spinner {width}
+          Spinner
         </Text>
         <Text
           height={"fill-parent"}
