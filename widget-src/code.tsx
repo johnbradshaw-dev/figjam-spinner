@@ -761,7 +761,9 @@ function Widget() {
             horizontalAlignText="center"
             fontSize={30 * scale}
           >
-            It's {winner ? winner.name : ""}'s turn!
+            It's{" "}
+            {winner ? (nickNamesEnabled ? winner.name : winner.nickName) : ""}'s
+            turn!
           </Text>
         ) : (
           <Text
