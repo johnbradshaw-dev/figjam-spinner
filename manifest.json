@@ -6,5 +6,9 @@
   "permissions": ["activeusers", "currentuser"],
   "containsWidget": true,
   "main": "dist/code.js",
-  "widgetApi": "1.0.0"
+  "widgetApi": "1.0.0",
+  "networkAccess": {
+    "allowedDomains": ["https://s3-alpha.figma.com/"],
+    "reasoning": "Profile pictures for users."
+  }
 }

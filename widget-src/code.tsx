@@ -762,7 +762,7 @@ function Widget() {
             fontSize={30 * scale}
           >
             It's{" "}
-            {winner ? (nickNamesEnabled ? winner.name : winner.nickName) : ""}'s
+            {winner ? (nickNamesEnabled ? winner.nickName : winner.name) : ""}'s
             turn!
           </Text>
         ) : (
